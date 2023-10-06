@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -39,13 +38,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.onlinebarbashop.R
 import com.example.onlinebarbashop.ui.reuseable_compasables.ReusableButton
 import com.example.onlinebarbashop.ui.reuseable_compasables.ReusableOutlinedTextField
+import com.example.onlinebarbashop.ui.reuseable_compasables.ReusablePasswordTextField
 import com.example.onlinebarbashop.ui.reuseable_compasables.ReusableTextButton
 import com.example.onlinebarbashop.ui.theme.OnlineBarbashopTheme
 import com.example.onlinebarbashop.ui.theme.myGreyBackground
@@ -54,8 +53,8 @@ import com.example.onlinebarbashop.ui.theme.myGreyBackground
 fun Login() {
     val emailAddress = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+    val viewPassword = remember { mutableStateOf(false) }
     var showCreateAccountSheet by remember { mutableStateOf(false) }
-    val verticalPadding = 4.dp
 
     if (showCreateAccountSheet) {
         BottomSheet { showCreateAccountSheet = false }
@@ -108,20 +107,17 @@ fun Login() {
                 null,
                 ImeAction.Next,
                 VisualTransformation.None,
-                verticalPadding
+                "",
             ) { newValue ->
                 emailAddress.value = newValue
             }
 
-            ReusableOutlinedTextField(
-                password.value,
-                "Password",
-                Icons.Rounded.Lock,
-                KeyboardType.Password,
-                null,
-                ImeAction.Done,
-                PasswordVisualTransformation(),
-                verticalPadding
+            ReusablePasswordTextField(
+                textFieldValue = password.value,
+                textFieldLabel = "Password",
+                imeAction = ImeAction.Done,
+                viewPassword = viewPassword,
+                supportingText = "", /*TODO for incorrect credentials*/
             ) { newValue ->
                 password.value = newValue
             }

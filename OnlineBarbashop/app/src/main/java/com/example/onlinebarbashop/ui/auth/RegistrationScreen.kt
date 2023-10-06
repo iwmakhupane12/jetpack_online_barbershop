@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.Checkbox
@@ -31,26 +30,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.onlinebarbashop.ui.reuseable_compasables.ReusableButton
 import com.example.onlinebarbashop.ui.reuseable_compasables.ReusableOutlinedTextField
+import com.example.onlinebarbashop.ui.reuseable_compasables.ReusablePasswordTextField
 import com.example.onlinebarbashop.ui.theme.OnlineBarbashopTheme
 import com.example.onlinebarbashop.ui.theme.myGoldBackground
 import com.example.onlinebarbashop.ui.theme.myGreyBackground
+import com.example.onlinebarbashop.ui.util.emailValidation
+import com.example.onlinebarbashop.ui.util.namesValidation
+import com.example.onlinebarbashop.ui.util.passwordMatch
+import com.example.onlinebarbashop.ui.util.passwordValidation
+import com.example.onlinebarbashop.ui.util.phoneNumValidation
 
 @Composable
 fun Registration(onDismiss: () -> Unit) {
     val name = remember { mutableStateOf("") }
-    val lastName = remember { mutableStateOf("") }
     val phoneNum = remember { mutableStateOf("") }
     val emailAddress = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
     val checked = remember { mutableStateOf(false) }
-    var verticalPadding = 4.dp
+    val viewPassword = remember { mutableStateOf(false) }
+    val viewConfirmPassword = remember { mutableStateOf(false) }
+    val passwordMismatch = remember { mutableStateOf(false) }
+
+    val namesValidation = remember { mutableStateOf("") }
+    val phoneNumValidation = remember { mutableStateOf("") }
+    val emailValidation = remember { mutableStateOf("") }
+    val passwordValidation = remember { mutableStateOf("") }
+    val confirmPasswordValidation = remember { mutableStateOf("") }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -66,28 +77,16 @@ fun Registration(onDismiss: () -> Unit) {
         ) {
             ReusableOutlinedTextField(
                 textFieldValue = name.value,
-                textFieldLabel = "Name",
+                textFieldLabel = "Names",
                 leadingIcon = Icons.Rounded.Person,
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Next,
                 visualTransformation = VisualTransformation.None,
-                verticalPadding = verticalPadding,
+                namesValidation.value,
             ) { newValue ->
                 name.value = newValue
-            }
-
-            ReusableOutlinedTextField(
-                textFieldValue = lastName.value,
-                textFieldLabel = "Lastname",
-                leadingIcon = Icons.Rounded.Person,
-                keyboardType = KeyboardType.Text,
-                capitalization = KeyboardCapitalization.Words,
-                imeAction = ImeAction.Next,
-                visualTransformation = VisualTransformation.None,
-                verticalPadding = verticalPadding,
-            ) { newValue ->
-                lastName.value = newValue
+                namesValidation.value = namesValidation(names = name.value)
             }
 
             ReusableOutlinedTextField(
@@ -98,9 +97,10 @@ fun Registration(onDismiss: () -> Unit) {
                 capitalization = null,
                 imeAction = ImeAction.Next,
                 visualTransformation = VisualTransformation.None,
-                verticalPadding = verticalPadding,
+                phoneNumValidation.value,
             ) { newValue ->
                 phoneNum.value = newValue
+                phoneNumValidation.value = phoneNumValidation(phoneNum = phoneNum.value)
             }
 
             ReusableOutlinedTextField(
@@ -111,42 +111,38 @@ fun Registration(onDismiss: () -> Unit) {
                 capitalization = null,
                 imeAction = ImeAction.Next,
                 visualTransformation = VisualTransformation.None,
-                verticalPadding = verticalPadding,
+                emailValidation.value,
             ) { newValue ->
                 emailAddress.value = newValue
+                emailValidation.value = emailValidation(emailAddress = emailAddress.value)
             }
 
-            ReusableOutlinedTextField(
+            ReusablePasswordTextField(
                 textFieldValue = password.value,
-                textFieldLabel = "Password",
-                leadingIcon = Icons.Rounded.Lock,
-                keyboardType = KeyboardType.Password,
-                capitalization = null,
+                textFieldLabel = "New password",
                 imeAction = ImeAction.Next,
-                visualTransformation = PasswordVisualTransformation(),
-                verticalPadding = verticalPadding,
+                viewPassword = viewPassword,
+                supportingText = passwordValidation.value,
             ) { newValue ->
                 password.value = newValue
+                passwordValidation.value = passwordMatch(confirmPassword.value, password.value)
             }
 
-            ReusableOutlinedTextField(
+            ReusablePasswordTextField(
                 textFieldValue = confirmPassword.value,
                 textFieldLabel = "Confirm password",
-                leadingIcon = Icons.Rounded.Lock,
-                keyboardType = KeyboardType.Password,
-                capitalization = null,
                 imeAction = ImeAction.Done,
-                visualTransformation = PasswordVisualTransformation(),
-                verticalPadding = verticalPadding,
+                viewPassword = viewConfirmPassword,
+                supportingText = confirmPasswordValidation.value,
             ) { newValue ->
                 confirmPassword.value = newValue
+                confirmPasswordValidation.value =
+                    passwordMatch(confirmPassword.value, password.value)
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Checkbox(
                     checked = checked.value,
@@ -163,7 +159,14 @@ fun Registration(onDismiss: () -> Unit) {
                 )
             }
 
-            ReusableButton(text = "SIGN UP") {}
+            ReusableButton(text = "SIGN UP") {
+                namesValidation.value = namesValidation(names = name.value)
+                phoneNumValidation.value = phoneNumValidation(phoneNum = phoneNum.value)
+                emailValidation.value = emailValidation(emailAddress = emailAddress.value)
+                passwordValidation.value = passwordValidation(password = password.value)
+                confirmPasswordValidation.value =
+                    passwordValidation(password = confirmPassword.value)
+            }
 
             Spacer(modifier = Modifier.size(12.dp))
 
